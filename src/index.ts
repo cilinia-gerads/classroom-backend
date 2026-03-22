@@ -1,0 +1,82 @@
+// import AgentAPI from "apminsight";
+// AgentAPI.config()
+
+import express from 'express';
+import cors from "cors";
+
+import subjectsRouter from "./routes/subjects.js";
+import usersRouter from "./routes/users.js";
+import classesRouter from "./routes/classes.js";
+import securityMiddleware from "./middleware/security.js";
+import { toNodeHandler } from 'better-auth/node';
+import { auth } from './lib/auth.js';
+
+const app = express();
+const PORT = 8000;
+
+if (!process.env.FRONTEND_URL) throw new Error('FRONTEND_URL is not set in .env file');
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}))
+
+
+app.all('/api/auth/*splat', toNodeHandler(auth));
+
+app.use(express.json());
+app.use(securityMiddleware);
+
+app.use('/api/subjects', subjectsRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/classes', classesRouter)
+
+
+app.get('/', (req, res) => {
+  res.send('Hello, welcome to the Classroom API!');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running at http://localhost:${PORT}`);
+});
+
+
+
+
+
+
+
+
+// import express from "express";
+// import subjectsRouter from './routes/subjects.js';
+// import cors from "cors";
+
+// const app = express();
+// const PORT = 8000;
+
+// // middleware
+// app.use(express.json());
+// // app.use(cors())
+// app.use('/api/subjects', subjectsRouter)
+
+// if(!process.env.FRONTEND_URL) throw new Error('FRONTEND_URL is not set in .env file');
+
+// app.use(cors({
+//   origin: process.env.FRONTEND_URL,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//   credentials: true,
+// }))
+
+// // root route
+// app.get("/", (req, res)  => {
+//   res.json({
+//     message: "Server is running 🚀",
+//   });
+// });
+
+// // start server
+// app.listen(PORT, () => {
+//   const url = `http://localhost:${PORT}`;
+//   console.log(`Server started at ${url}`);
+// });
